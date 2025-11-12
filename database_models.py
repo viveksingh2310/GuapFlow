@@ -21,7 +21,7 @@ class Account(Base):
     name=Column(String) #cust name
     type=Column(String)
     kycNo=Column(String) #no dependency
-    phone=Column(Integer) #common bw customer table 
+    phone=Column(BigInteger) #common bw customer table 
     balance=Column(Float)
     outStBalance=Column(Float)
     otherExpense=Column(Float)
@@ -47,7 +47,7 @@ class Branch(Base):
     __tablename__="Branch"
     branchId=Column(BigInteger,primary_key=True) #or branch code
     name=Column(String) #name of the branch
-    addresss=Column(String)
+    address=Column(String)
     ifscCode=Column(String)
     branchType=Column(String)
 
@@ -59,3 +59,4 @@ class Transaction(Base):
     timestamp=Column(DateTime)
     isSuccess=Column(Boolean)
     onRevert=Column(Boolean)
+    amount=Column(Float)
