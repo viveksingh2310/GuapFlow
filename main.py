@@ -127,3 +127,95 @@ def createTransaction(trans_data:schemas.TransactionCreate,db:Session=Depends(is
 def read_root():
     """Welcome endpoint"""
     return {"message": "Welcome to the Simple Banking API"}
+
+
+#--------------------------------------ALL UPDATION FUNCTIONS GO HERE--------------------------------------------------
+@app.put('/updateCustomer/{customer_id}')
+def update_customer(customer_id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(isDBconnected)):
+    db_customer = db.query(database_models.Customer).filter(
+        database_models.Customer.id == customer_id
+    ).first()
+    if db_customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Customer not found"
+        )
+    update_data = customer_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_customer, key, value)
+    db.commit()
+    db.refresh(db_customer)
+    return {
+        "status":"success",
+        "data":db_customer
+    }
+@app.put("/updateAccount/{accNo}")
+def updateAccount(accNo:int,new_acc:schemas.AccountUpdate,db: Session=Depends(isDBconnected)):
+    db_acc=db.query(database_models.Account).filter(database_models.Account.accNo==accNo).first()
+    if db_acc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='The specified account not found'
+        )
+    update_acc=new_acc.model_dump(exclude_unset=True)
+    for key,value in update_acc.items():
+        setattr(db_acc,key,value)
+    db.commit()
+    db.refresh(db_acc)
+    return {
+        "status":"success",
+        "data":db_acc
+    }
+
+@app.put('/updateLoan/{loanId}')
+def updateLoan(loanId:int,new_loan:schemas.LoanUpdate,db:Session=Depends(isDBconnected)):
+    db_loan=db.query(database_models.Loan).filter(database_models.Loan.loanId==loanId).first()
+    if db_loan is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='The specified Loan not found'
+        )
+    update_loan=new_loan.model_dump(exclude_unset=True)
+    for key, value in update_loan.items():
+        setattr(db_loan,key,value)
+    db.commit()
+    db.refresh(db_loan)
+    return {
+        "status":"success",
+        "data":db_loan
+    }
+@app.put('/updateBranch/{branchId}')
+def updateBranch(branchId:int,new_branch:schemas.BranchUpdate,db:Session=Depends(isDBconnected)):
+    db_branch=db.query(database_models.Branch).filter(database_models.Branch.branchId==branchId).first()
+    if db_branch is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Specified Loan does not exist'
+        )
+    update_branch=new_branch.model_dump(exclude_unset=True)
+    for key,value in update_branch.items():
+        setattr(db_branch,key,value)
+    db.commit()
+    db.refresh(db_branch)
+    return {
+        "status":"success",
+        "data":db_branch
+    }
+
+@app.put('/updateTransaction/{id}')
+def updateTransaction(id:str,new_tran:schemas.TransactionUpdate,db:Session=Depends(isDBconnected)):
+    db_transaction=db.query(database_models.Transaction).filter(database_models.Transaction.id==id).first()
+    if db_transaction is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Transaction Not Found'
+        )
+    update_trans=new_tran.model_dump(exclude_unset=True)
+    for key,value in update_trans.items():
+        setattr(db_transaction,key,value)
+    db.commit()
+    db.refresh(db_transaction)
+    return {
+        "status":"success",
+        "data":db_transaction
+    }

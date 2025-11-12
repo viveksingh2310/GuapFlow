@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date, time,datetime
-from typing import List
+from typing import List,Optional
 
 class CustomerCreate(BaseModel):
     fname: str
@@ -13,6 +13,17 @@ class CustomerCreate(BaseModel):
     nomeneeId: str
     joiningyear: date
 
+class CustomerUpdate(BaseModel):
+    fname: Optional[str] = None
+    lname: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    aadharNo: Optional[str] = None
+    dob: Optional[date] = None
+    joiningyear: Optional[date] = None
+    nomeneeId: Optional[str] = None
+
 class AccountCreate(BaseModel):
       accNo:int
       name:str
@@ -23,6 +34,15 @@ class AccountCreate(BaseModel):
       outStBalance:float
       otherExpense:float
 
+class AccountUpdate(BaseModel):
+      accNo:Optional[int]=None
+      name:Optional[str] = None
+      type:Optional[str] = None
+      kycNo:Optional[str] = None
+      phone:Optional[int] = None
+      balance:Optional[float] = None
+      outStBalance:Optional[float] = None
+      otherExpense:Optional[float] = None
 class LoanCreate(BaseModel):
     loanId:int
     accNo:int
@@ -33,6 +53,17 @@ class LoanCreate(BaseModel):
     issueDate:date
     gracePeriod:date
     collateralList:List[str]
+
+class LoanUpdate(BaseModel):
+    loanId:Optional[int] = None
+    accNo:Optional[int] = None
+    type:Optional[str] = None
+    amount:Optional[float] = None
+    roi:Optional[float] = None
+    repaymentDate:Optional[date] = None
+    issueDate:Optional[date] = None
+    gracePeriod:Optional[date] = None
+    collateralList:Optional[List[str]] = None
 
 class BankCreate(BaseModel):
      bankID:int
@@ -45,6 +76,12 @@ class BranchCreate(BaseModel):
     ifscCode:str
     branchType:str
 
+class BranchUpdate(BaseModel):
+     branchId:Optional[int]=None
+     name:Optional[str]=None
+     ifsccode:Optional[str]=None
+     branchType:Optional[str]=None
+     
 class TransactionCreate(BaseModel):
      id:str #pk
      senderId:int
@@ -53,3 +90,12 @@ class TransactionCreate(BaseModel):
      isSuccess:bool
      onRevert:bool
      amount:float
+    
+class TransactionUpdate(BaseModel):
+     id:Optional[str]=None
+     senderId:Optional[int]=None
+     receiver:Optional[int]=None
+     timestamp:Optional[datetime]=None
+     isSuccess:Optional[bool]=None
+     onRevert:Optional[bool]=None
+     amount:Optional[float]=None
