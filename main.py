@@ -219,3 +219,82 @@ def updateTransaction(id:str,new_tran:schemas.TransactionUpdate,db:Session=Depen
         "status":"success",
         "data":db_transaction
     }
+
+#--------------------------ALL READ METHODS GO HERE--------------------------------------------------
+@app.get('/customers')
+def getCustomer(db:Session=Depends(isDBconnected)):
+    customer_data=db.query(database_models.Customer).all()
+    if customer_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='No customer present in DB'
+        )
+    return {
+        "status":"success",
+        "data":customer_data
+    }
+@app.get('/customer/{id}')
+def getCustomer(id:int,db:Session=Depends(isDBconnected)):
+    db_customer=db.query(database_models.Customer).filter(database_models.Customer.id==id).first()
+    if db_customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            details='Specified ID not found'
+        )
+    return {
+        "status":"success",
+        "id":db_customer.id,
+        "data":db_customer
+    }
+
+@app.get('/account/{accNo}')
+def getAccount(accNo:int,db:Session=Depends(isDBconnected)):
+    db_acc=db.query(database_models.Account).filter(database_models.Account.accNo==accNo).first()
+    if db_acc is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Account not found with the given Account No.'
+        )
+    return {
+        "status":"success",
+        "data":db_acc
+    }
+
+@app.get('/loan/{loanId}')
+def getAccount(loanId:int,db:Session=Depends(isDBconnected)):
+    db_loan=db.query(database_models.Loan).filter(database_models.Loan.loanId==loanId).first()
+    if db_loan is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Account not found with the given Account No.'
+        )
+    return {
+        "status":"success",
+        "data":db_loan
+    }
+
+@app.get('/branch/{branchId}')
+def getAccount(branchId:int,db:Session=Depends(isDBconnected)):
+    db_branch=db.query(database_models.Branch).filter(database_models.Branch.branchId==branchId).first()
+    if db_branch is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Account not found with the given Account No.'
+        )
+    return {
+        "status":"success",
+        "data":db_branch
+    }
+
+@app.get('/transaction/{id}')
+def getAccount(id:str,db:Session=Depends(isDBconnected)):
+    db_transaction=db.query(database_models.Transaction).filter(database_models.Transaction.id==id).first()
+    if db_transaction is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Account not found with the given Account No.'
+        )
+    return {
+        "status":"success",
+        "data":db_transaction
+    }
