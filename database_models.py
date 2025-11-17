@@ -1,7 +1,37 @@
-from sqlalchemy import Column, Integer,Date,DateTime,Float,String,BigInteger, Boolean
+from sqlalchemy import Column, Integer,Date,DateTime,Float,String,BigInteger, Boolean, create_engine
 from sqlalchemy.types import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+# --- DATABASE SETUP ---
+database_url="postgresql+psycopg2://postgres:vivek@localhost:5432/guapflow"
+engine = create_engine(database_url)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# --- DATABASE DEPENDENCY ---
+def get_db():
+    """
+    A dependency function to get a database session.
+    This will be used in all endpoints.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# --- MODELS ---
+
+class User(Base):
+    __tablename__ = "Users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_admin = Column(Boolean, default=False)
+
 class Customer(Base):
     __tablename__="Customer"
     id=Column(Integer, primary_key=True, autoincrement=True)
@@ -25,6 +55,7 @@ class Account(Base):
     balance=Column(Float)
     outStBalance=Column(Float)
     otherExpense=Column(Float)
+    branchId=Column(BigInteger) #mapped
 
 class Loan(Base):
     __tablename__="Loan"

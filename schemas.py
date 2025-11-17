@@ -1,3 +1,5 @@
+
+
 from pydantic import BaseModel
 from datetime import date, time,datetime
 from typing import List,Optional
@@ -33,6 +35,7 @@ class AccountCreate(BaseModel):
       balance:float
       outStBalance:float
       otherExpense:float
+      branchId:int
 
 class AccountUpdate(BaseModel):
       accNo:Optional[int]=None
@@ -43,6 +46,8 @@ class AccountUpdate(BaseModel):
       balance:Optional[float] = None
       outStBalance:Optional[float] = None
       otherExpense:Optional[float] = None
+      branchId:int
+
 class LoanCreate(BaseModel):
     loanId:int
     accNo:int
@@ -90,7 +95,7 @@ class TransactionCreate(BaseModel):
      isSuccess:bool
      onRevert:bool
      amount:float
-    
+     
 class TransactionUpdate(BaseModel):
      id:Optional[str]=None
      senderId:Optional[int]=None
@@ -99,3 +104,28 @@ class TransactionUpdate(BaseModel):
      isSuccess:Optional[bool]=None
      onRevert:Optional[bool]=None
      amount:Optional[float]=None
+
+# --- NEW SCHEMAS FOR AUTHENTICATION ---
+# (This is the part that was missing and causing the error)
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    is_admin: Optional[bool] = False
+
+class UserDisplay(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_admin: bool
+
+    class Config:
+        from_attributes = True # Allows Pydantic to read from SQLAlchemy objects
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
