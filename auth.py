@@ -22,7 +22,6 @@ def get_password_hash(password: str) -> str:
     """Hashes a plain-text password."""
     return pwd_context.hash(password)
 
-
 # --- 2. JWT (Token) Configuration ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -61,7 +60,6 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str | None = payload.get("sub")

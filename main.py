@@ -11,7 +11,6 @@ import auth
 from database_models import engine, get_db # Import get_db
 
 #START UP COMMAND =>  py -m uvicorn main:app --reload
-
 # Create all tables
 # This will create the new 'users' table
 database_models.Base.metadata.create_all(bind=engine)
