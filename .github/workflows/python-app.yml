@@ -1,0 +1,63 @@
+name: Python Multi-Service CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        # These names must match the folder names inside your /backend directory
+        service: [user-service, loan-service, account-service]
+    
+    # Links the matrix run to your specific GitHub Environment for secrets
+    environment: ${{ matrix.service }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        # Updated path to include the 'backend' folder
+        if [ -f backend/${{ matrix.service }}/requirements.txt ]; then 
+          pip install -r backend/${{ matrix.service }}/requirements.txt; 
+        fi
+
+    - name: Create .env file for ${{ matrix.service }}
+      run: |
+        # Navigates into the nested directory to create the .env
+        cd backend/${{ matrix.service }}
+        touch .env
+        # This will write the secret from your environment into the file
+        echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+        # Optional: verify file creation
+        ls -a
+
+    - name: Lint with flake8
+      run: |
+        # Point flake8 to the specific nested service folder
+        flake8 backend/${{ matrix.service }} --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 backend/${{ matrix.service }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      env:
+        # Mapping specific secrets if your tests need them as environment variables
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        # Run tests specifically for the code inside the backend folder
+        pytest backend/${{ matrix.service }}
