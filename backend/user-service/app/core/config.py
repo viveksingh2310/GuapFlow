@@ -17,7 +17,7 @@ class Settings:
     if ALGORITHM is None:
         raise RuntimeError("ALGORITHM is not set in the .env file")
     if ACCESS_TOKEN_EXPIRE_MINUTES is None:
-        raise RunTimeError("ACCESS_TOKEN_EXPIRES_MINUTES is not set in the .env file")
+        raise RuntimeError("ACCESS_TOKEN_EXPIRES_MINUTES is not set in the .env file")
     if ROLE_ADMIN is None:
         raise RuntimeError("ROLE_ADMIN is not set in .env file")
     if ROLE_USER is None:
