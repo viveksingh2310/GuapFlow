@@ -1,0 +1,208 @@
+{
+  "info": {
+    "_postman_id": "c8780a9c-95e1-4f0e-add3-ee5fe739c92a",
+    "name": "Loan–Account Integration Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32640249"
+  },
+  "item": [
+    {
+      "name": "get acc no req",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.environment.get(\"jwt_token\")) {\r",
+              "    pm.sendRequest(\r",
+              "        {\r",
+              "            url: pm.environment.get(\"user_service_url\") + \"/users/check\",\r",
+              "            method: \"POST\",\r",
+              "            header: { \"Content-Type\": \"application/json\" },\r",
+              "            body: {\r",
+              "                mode: \"raw\",\r",
+              "                raw: JSON.stringify({\r",
+              "                    email: pm.environment.get(\"test_username\"),\r",
+              "                    password: pm.environment.get(\"test_password\")\r",
+              "                })\r",
+              "            }\r",
+              "        },\r",
+              "        function (err, res) {\r",
+              "            if (err) {\r",
+              "                throw new Error(\"Login failed\");\r",
+              "            }\r",
+              "\r",
+              "            const json = res.json();\r",
+              "            pm.environment.set(\"jwt_token\", json.access_token);\r",
+              "        }\r",
+              "    );\r",
+              "}\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{account_service_url}}/accounts/accno",
+          "host": [
+            "{{account_service_url}}"
+          ],
+          "path": [
+            "accounts",
+            "accno"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Secured Loan (Integration)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Loan service responded correctly\", function () {\r",
+              "    pm.expect([200, 400]).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Loan–Account integration is working\", function () {\r",
+              "    const response = pm.response.json();\r",
+              "\r",
+              "    if (pm.response.code === 200) {\r",
+              "        pm.expect(response.acc_no).to.be.a(\"string\");\r",
+              "    }\r",
+              "\r",
+              "    if (pm.response.code === 400) {\r",
+              "        pm.expect(response.detail).to.include(\"Loan already exists\");\r",
+              "    }\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Vivek Singh\",\r\n  \"issue_date\": \"2026-01-15\",\r\n  \"loan_type\": \"secured\",\r\n  \"time\": 60,\r\n  \"consultant_name\": \"Rahul Sharma\",\r\n  \"status\": \"approved\",\r\n  \"scheme_name\": \"Home Loan Scheme A\",\r\n  \"collateral_type\": \"property\",\r\n  \"collateral_value\": 8500000\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{loan_service_url}}/loans",
+          "host": [
+            "{{loan_service_url}}"
+          ],
+          "path": [
+            "loans"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "/**\r",
+          " * Generate JWT once per collection run\r",
+          " */\r",
+          "if (!pm.environment.get(\"jwt_token\")) {\r",
+          "    pm.sendRequest(\r",
+          "        {\r",
+          "            url: pm.environment.get(\"user_service_url\") + \"/users/check\",\r",
+          "            method: \"POST\",\r",
+          "            header: {\r",
+          "                \"Content-Type\": \"application/json\"\r",
+          "            },\r",
+          "            body: {\r",
+          "                mode: \"raw\",\r",
+          "                raw: JSON.stringify({\r",
+          "                    email: pm.environment.get(\"test_username\"),\r",
+          "                    password: pm.environment.get(\"test_password\")\r",
+          "                })\r",
+          "            }\r",
+          "        },\r",
+          "        function (err, res) {\r",
+          "            if (err) {\r",
+          "                throw new Error(\"Login request failed\");\r",
+          "            }\r",
+          "\r",
+          "            const json = res.json();\r",
+          "\r",
+          "            if (!json.access_token) {\r",
+          "                throw new Error(\"JWT not returned from login API\");\r",
+          "            }\r",
+          "\r",
+          "            pm.environment.set(\"jwt_token\", json.access_token);\r",
+          "            console.log(\"JWT generated successfully\");\r",
+          "        }\r",
+          "    );\r",
+          "}\r",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
