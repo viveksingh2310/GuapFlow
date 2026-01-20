@@ -32,7 +32,7 @@ async def create_user(db: AsyncSession, user: UserBase):
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
-    token_expires_minutes=timedelta(int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    token_expires_minutes=timedelta(int(settings.ACCESS_TOKEN_EXPIRES_MINUTES))
     role = settings.ROLE_ADMIN if db_user.isAdmin else settings.ROLE_USER
     access_token=create_access_token(data={"sub":str(db_user.id),"role":role},expires_delta=token_expires_minutes)
     return {
@@ -62,7 +62,7 @@ async def get_user(db:AsyncSession,user:UserCreate):
             status_code=status.HTTP_401_UNAUTHORIZED, 
             detail="Invalid email or password"
         )
-    token_expires_minutes=timedelta(int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    token_expires_minutes=timedelta(int(settings.ACCESS_TOKEN_EXPIRES_MINUTES))
     role = settings.ROLE_ADMIN if db_user.isAdmin else settings.ROLE_USER
     access_token=create_access_token(data={"sub":str(db_user.id),"role":role},expires_delta=token_expires_minutes)
     return {
