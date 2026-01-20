@@ -15,9 +15,10 @@ jobs:
     
     strategy:
       matrix:
-        # Based on your image, these are the folder names inside /backend
-        service: [user-service, loan-service, account-service, transaction-service]
+        # Targeting only active Python services with servers
+        service: [user-service, loan-service, account-service]
     
+    # This connects the run to the corresponding GitHub Environment
     environment: ${{ matrix.service }}
 
     steps:
@@ -32,28 +33,28 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        # Path updated to point to the requirements.txt in the backend folder
+        # Installs from the shared requirements.txt in the backend directory
         if [ -f backend/requirements.txt ]; then 
           pip install -r backend/requirements.txt; 
         fi
 
     - name: Create .env file for ${{ matrix.service }}
       run: |
-        # Navigates into the specific service folder inside backend
+        # Creates the .env file within each service folder
         cd backend/${{ matrix.service }}
         touch .env
-        # Ensure you have ENV_FILE_CONTENT set in your GitHub Environment Secrets
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
 
     - name: Lint with flake8
       run: |
-        # Linting the specific service folder
+        # Linting only the current service folder in the matrix
         flake8 backend/${{ matrix.service }} --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 backend/${{ matrix.service }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
       env:
+        # Providing necessary environment variables for the test suite
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
-        # Run tests for the specific service
+        # Run tests for the specific active service
         pytest backend/${{ matrix.service }}
