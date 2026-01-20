@@ -17,7 +17,6 @@ jobs:
       matrix:
         service: [user-service, loan-service, account-service]
     
-    # Crucial: This must match your Environment names in GitHub Settings
     environment: ${{ matrix.service }}
 
     steps:
@@ -40,10 +39,10 @@ jobs:
       run: |
         cd backend/${{ matrix.service }}
         touch .env
-        # We use 'unbuffer' or direct echo to ensure secrets aren't skipped
-        # Map every variable your 'Settings' class requires
+        # Injecting all required variables into the .env file
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
         echo "ACCESS_TOKEN_EXPIRES_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRES_MINUTES }}" >> .env
 
     - name: Lint with flake8
@@ -53,11 +52,11 @@ jobs:
 
     - name: Test with pytest
       env:
-        # Pass variables directly to the shell environment as well
+        # Ensuring variables are also available as system env vars
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        ALGORITHM: ${{ secrets.ALGORITHM }}
         PYTHONPATH: ${{ github.workspace }}/backend/${{ matrix.service }}
       run: |
-        # Run pytest from the service directory to avoid import issues
         cd backend/${{ matrix.service }}
         pytest tests/
