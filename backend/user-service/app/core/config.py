@@ -20,6 +20,7 @@ class Settings:
         raise RuntimeError("ACCESS_TOKEN_EXPIRES_MINUTES is not set in the .env file")
     if ROLE_ADMIN is None:
         raise RuntimeError("ROLE_ADMIN is not set in .env file")
+    
     if ROLE_USER is None:
         raise RuntimeError("ROLE_USER is not set in .env file")
     
