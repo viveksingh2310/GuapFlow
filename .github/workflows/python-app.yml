@@ -1,7 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Python application
+name: Python Multi-Service CI
 
 on:
   push:
@@ -14,26 +11,54 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    
+    # Use a matrix to run this job for each service environment
+    strategy:
+      matrix:
+        service: [user-service, loan-service, account-service]
+    
+    # This tells GitHub to pull secrets from the specific environment
+    environment: ${{ matrix.service }}
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Navigate into the specific service directory and install its requirements
+        if [ -f ${{ matrix.service }}/requirements.txt ]; then 
+          pip install -r ${{ matrix.service }}/requirements.txt; 
+        fi
+
+    - name: Create .env file for ${{ matrix.service }}
+      run: |
+        # This dynamically builds the .env file inside the service folder 
+        # using the secrets stored in your GitHub Environment
+        cd ${{ matrix.service }}
+        touch .env
+        echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+        # OR if you have individual secrets:
+        # echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        # echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Only lint the code for the current service in the matrix
+        flake8 ${{ matrix.service }} --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 ${{ matrix.service }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
     - name: Test with pytest
+      env:
+        # Some tests might need env vars directly in the system memory
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
-        pytest
+        # Run tests specifically for this service
+        pytest ${{ matrix.service }}
