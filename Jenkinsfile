@@ -51,16 +51,28 @@ pipeline {
             }
         }
 
-        stage("Run Tests") {
-            steps {
-                dir('backend') {
-                    bat """
-                    call venv\\Scripts\\activate.bat
-                    pytest -v
-                    """
-                }
-            }
+       stage("Run Tests") {
+    steps {
+        dir('backend') {
+            bat """
+            call venv\\Scripts\\activate.bat
+
+            cd account-service
+            pytest account_tests -v
+            cd ..
+
+            cd loan-service
+            pytest loan_tests -v
+            cd ..
+
+            cd user-service
+            pytest user_tests -v
+            cd ..
+            """
         }
+    }
+}
+
     }
 
     post {
