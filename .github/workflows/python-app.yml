@@ -15,10 +15,8 @@ jobs:
     
     strategy:
       matrix:
-        # These must match your folder names inside the 'backend' directory
         service: [user-service, loan-service, account-service]
     
-    # Tells GitHub to pull secrets from the environment matching the service name
     environment: ${{ matrix.service }}
 
     steps:
@@ -33,7 +31,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        # Installs from the shared requirements file in the backend folder
         if [ -f backend/requirements.txt ]; then 
           pip install -r backend/requirements.txt; 
         fi
@@ -42,7 +39,6 @@ jobs:
       run: |
         cd backend/${{ matrix.service }}
         touch .env
-        # Mapping the exact secrets shown in your screenshots
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
         echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
@@ -51,25 +47,28 @@ jobs:
         echo "ROLE_ADMIN=${{ secrets.ROLE_ADMIN }}" >> .env
         echo "ROLE_USER=${{ secrets.ROLE_USER }}" >> .env
         
-        # Additional secret specific to loan-service shown in your image
         if [ "${{ matrix.service }}" == "loan-service" ]; then
           echo "ACCOUNT_SERVICE_URL=${{ secrets.ACCOUNT_SERVICE_URL }}" >> .env
         fi
 
     - name: Lint with flake8
       run: |
-        # Linting the specific service directory
         flake8 backend/${{ matrix.service }} --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 backend/${{ matrix.service }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
       env:
-        # Ensuring critical variables are available in the system environment
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         ALGORITHM: ${{ secrets.ALGORITHM }}
         PYTHONPATH: ${{ github.workspace }}/backend/${{ matrix.service }}
       run: |
         cd backend/${{ matrix.service }}
-        # Running pytest for the specific service tests
-        pytest tests/
+
+        if [ "${{ matrix.service }}" == "user-service" ]; then
+          pytest user_tests -v
+        elif [ "${{ matrix.service }}" == "loan-service" ]; then
+          pytest loan_tests -v
+        elif [ "${{ matrix.service }}" == "account-service" ]; then
+          pytest account_tests -v
+        fi
