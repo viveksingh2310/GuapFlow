@@ -58,7 +58,8 @@ async def fake_get(user_id, db):
 async def fake_getAc(user_id, db):
     return {
         "user_id": str(user_id),
-        "acc_no": "ACC123456"
+        "acc_no": "ACC123456",
+        "amount":786
     }
 
 async def fake_login(account, user_id, db):
@@ -137,7 +138,7 @@ def test_update_account_by_user(monkeypatch):
     async def fake_checkUser():
         return FAKE_ACCOUNT_RESPONSE
     app.dependency_overrides[checkUser] = fake_checkUser
-    monkeypatch.setattr("app.api.routes.update", fake_update)
+    monkeypatch.setattr("app.api.routes.updateAc", fake_update)
     payload = {
         "name": "Updated Name"
     }

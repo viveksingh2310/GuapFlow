@@ -57,7 +57,12 @@ class AccountLogin(BaseModel):
 class AccNoResponse(BaseModel):
     user_id:UUID
     acc_no:str
-    
+    amount:int
+class AccountTransactionDetail(BaseModel):
+    sender_acc:str
+    receiver_acc:str
+    amount:int
+
 class UpdateAccountByUser(BaseModel):
     name:Optional[str]=None    
     phone:Optional[str]=None   

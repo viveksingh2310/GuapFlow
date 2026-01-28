@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select,update
 from app.models.models import Account
 from fastapi import HTTPException,status
-from app.schemas.schemas import AccountCreate,AccountLogin,UpdateAccountByUser,AccountResponse,UpdateAccountByAdmin
+from app.schemas.schemas import AccountCreate,AccountLogin,UpdateAccountByUser,AccountResponse,UpdateAccountByAdmin,AccountTransactionDetail
 from passlib.context import CryptContext
 from uuid import UUID
 
@@ -64,7 +64,7 @@ async def login(account:AccountLogin,user_id:UUID,db:AsyncSession):
         )
     return account_db
 
-async def update(account:UpdateAccountByUser,db_account:AccountResponse,db:AsyncSession):
+async def updateAc(account:UpdateAccountByUser,db_account:AccountResponse,db:AsyncSession):
     if account.name:
         db_account.name=account.name
     if account.phone:
@@ -135,5 +135,65 @@ async def getAc(user_id:UUID,db:AsyncSession):
         )
     return {
         "user_id": user_id,
-        "acc_no": res.acc_no
+        "acc_no": res.acc_no,
+        "amount":res.amount
     }
+async def accountValidation(account_no:str,db:AsyncSession):
+    result=await db.execute(select(Account).where(Account.acc_no==account_no))
+    res=result.scalars().first()
+    if not res:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Account does not exist for this user id"
+        )
+    return {
+        "user_id": res.user_id,
+        "acc_no": account_no,
+        "amount":res.amount
+        }
+async def exec_Transaction(tran_details: AccountTransactionDetail, user_id: UUID, db: AsyncSession):
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized route access"
+        )
+
+    sender_acc = tran_details.sender_acc
+    receiver_acc = tran_details.receiver_acc
+    amnt = tran_details.amount
+
+    sender_res = await db.execute(
+        select(Account).where(Account.acc_no == sender_acc)
+    )
+    receiver_res = await db.execute(
+        select(Account).where(Account.acc_no == receiver_acc)
+    )
+
+    sender = sender_res.scalars().first()
+    receiver = receiver_res.scalars().first()
+
+    if not sender:
+        raise HTTPException(400, "Sender account does not exist")
+
+    if not receiver:
+        raise HTTPException(400, "Receiver account does not exist")
+
+    if sender.amount < amnt:
+        raise HTTPException(400, "Insufficient balance")
+
+    # Debit sender
+    await db.execute(
+        update(Account)
+        .where(Account.acc_no == sender_acc)
+        .values(amount=Account.amount - amnt)
+    )
+
+    # Credit receiver
+    await db.execute(
+        update(Account)
+        .where(Account.acc_no == receiver_acc)
+        .values(amount=Account.amount + amnt)
+    )
+
+    await db.commit()
+    return sender

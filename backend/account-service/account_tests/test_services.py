@@ -3,7 +3,7 @@ from uuid import uuid4
 from datetime import date
 from types import SimpleNamespace
 from fastapi import HTTPException
-from app.services.services import (createAccount,login,update,updatebyadmin,get,getAc)
+from app.services.services import (createAccount,login,updateAc,updatebyadmin,get,getAc)
 from app.services import services
 from app.schemas.schemas import (AccountCreate,AccountLogin,UpdateAccountByUser,UpdateAccountByAdmin)
 class FakeResult:
@@ -145,7 +145,7 @@ async def test_update_account_by_user():
         phone="8888888888"
     )
 
-    result = await update(update_data, db_account, db)
+    result = await updateAc(update_data, db_account, db)
 
     assert result.name == "Updated Name"
     assert result.phone == "8888888888"
