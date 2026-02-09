@@ -15,7 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        service: [user-service, loan-service, account-service,transaction-service]
+        service: [user-service, loan-service, account-service,transaction-service,chat-service]
     
     environment: ${{ matrix.service }}
 
