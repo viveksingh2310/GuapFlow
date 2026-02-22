@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.services.services import validate_conversation,validate_message,create_message
 from app.db.db import get_db
 ws_router = APIRouter()
-print("heloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+# print("heloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
 rooms: Dict[str, List[WebSocket]] = {}
 
 @ws_router.websocket("/ws/{conversation_id}")

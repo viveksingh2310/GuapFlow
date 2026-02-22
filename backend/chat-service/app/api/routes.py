@@ -9,11 +9,11 @@ router=APIRouter(prefix="/chats")
 @router.get('/')
 async def getDefault():
     return await getDef()
-
+#------------------this is only for the consultant portal----------------------------------
 @router.post('/consultant',response_model=ConsultantResponse)
 async def consultantCreate(consultant:ConsultantCreate,db:Session=Depends(get_db)):
     return await createConsultant(consultant,db)
-
+#only for testing purpose only
 @router.get('/consul',response_model=None)
 async def getConsultant(db:Session=Depends(get_db)):
     return await select_consultant(db)

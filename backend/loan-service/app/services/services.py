@@ -26,9 +26,7 @@ async def fetch_account_number(token:str) -> str:
         )
     return response.json()["acc_no"]
 async def createLoan(loan: LoanCreateSchema,user_id: UUID,db: AsyncSession,token: str):
-    result = await db.execute(
-        select(Loan).where(Loan.user_id == user_id)
-    )
+    result = await db.execute(select(Loan).where(Loan.user_id == user_id))
     existing_loan = result.scalars().first()
     if existing_loan:
         raise HTTPException(
