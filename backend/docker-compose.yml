@@ -1,0 +1,213 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vivek
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context: ./user-service
+    container_name: user-service
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  account-service:
+    build:
+      context: ./account-service
+    container_name: account-service
+    ports:
+      - "8002:8000"
+    env_file:
+      - ./account-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  transaction-service:
+    build:
+      context: ./transaction-service
+    container_name: transaction-service
+    ports:
+      - "8003:8000"
+    env_file:
+      - ./transaction-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  loan-service:
+    build:
+      context: ./loan-service
+    container_name: loan-service
+    ports:
+      - "8004:8000"
+    env_file:
+      - ./loan-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  chat-service:
+    build:
+      context: ./chat-service
+    container_name: chat-service
+    ports:
+      - "8005:8000"
+    env_file:
+      - ./chat-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+
+# # version: "3.9"
+
+# # services:
+
+# #   user-service:
+# #     build:
+# #       context: ./user-service
+# #       dockerfile: Dockerfile
+# #     container_name: user-service
+# #     ports:
+# #       - "8000:8000"
+# #     env_file:
+# #       - ./user-service/.env
+# #     restart: always
+# #     networks:
+# #       - microservices-network
+
+# #   # account-service:
+# #   #   build:
+# #   #     context: ./account-service
+# #   #     dockerfile: Dockerfile
+# #   #   container_name: account-service
+# #   #   ports:
+# #   #     - "8002:8000"
+# #   #   env_file:
+# #   #     - ./account-service/.env
+# #   #   restart: always
+# #   #   networks:
+# #   #     - microservices-network
+
+# #   # loan-service:
+# #   #   build:
+# #   #     context: ./loan-service
+# #   #     dockerfile: Dockerfile
+# #   #   container_name: loan-service
+# #   #   ports:
+# #   #     - "8003:8000"
+# #   #   env_file:
+# #   #     - ./loan-service/.env
+# #   #   restart: always
+# #   #   networks:
+# #   #     - microservices-network
+
+# #   # transaction-service:
+# #   #   build:
+# #   #     context: ./transaction-service
+# #   #     dockerfile: Dockerfile
+# #   #   container_name: transaction-service
+# #   #   ports:
+# #   #     - "8004:8000"
+# #   #   env_file:
+# #   #     - ./transaction-service/.env
+# #   #   restart: always
+# #   #   networks:
+# #   #     - microservices-network
+
+# #   # chat-service:
+# #   #   build:
+# #   #     context: ./chat-service
+# #   #     dockerfile: Dockerfile
+# #   #   container_name: chat-service
+# #   #   ports:
+# #   #     - "8005:8000"
+# #   #   env_file:
+# #   #     - ./chat-service/.env
+# #   #   restart: always
+# #   #   networks:
+# #   #     - microservices-network
+
+# # networks:
+# #   microservices-network:
+# #     driver: bridge
+# services:
+
+#   user-service:
+#     build:
+#       context: ./user-service
+#     container_name: user-service
+#     ports:
+#       - "8001:8000"
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#     environment:
+#       - DATABASE_URL=postgresql+asyncpg://postgres:vivek@postgres:5432/userdb
+#     networks:
+#       - microservices-network
+
+#   postgres:
+#     image: postgres:15
+#     container_name: postgres
+#     restart: always
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: vivek
+#       POSTGRES_DB: userdb
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+#     networks:
+#       - microservices-network
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+# networks:
+#   microservices-network:
+#     driver: bridge
+
+# volumes:
+#   postgres-data:
